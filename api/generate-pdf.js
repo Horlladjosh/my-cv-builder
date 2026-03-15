@@ -1,6 +1,3 @@
-const puppeteer = require('puppeteer-core');
-const chrome = require('@sparticuz/chromium');
-
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -16,36 +13,45 @@ module.exports = async function handler(req, res) {
     // Generate HTML content
     const htmlContent = generateHTML(data);
 
-    // Launch Puppeteer with Chromium
-    const browser = await puppeteer.launch({
-      args: [...chrome.args, '--disable-dev-shm-usage'],
-      defaultViewport: chrome.defaultViewport,
-      executablePath: await chrome.executablePath(),
-      headless: 'new',
+    // Use PDFShift free API (250 PDFs/month)
+    // Sign up at https://pdfshift.io for API key
+    const PDFSHIFT_API_KEY = process.env.PDFSHIFT_API_KEY;
+
+    if (!PDFSHIFT_API_KEY) {
+      // No API key configured - return error so frontend falls back to HTML
+      return res.status(503).json({ error: 'PDF service not configured' });
+    }
+
+    const pdfResponse = await fetch('https://api.pdfshift.io/v3/convert/pdf', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Basic ${Buffer.from('api:' + PDFSHIFT_API_KEY).toString('base64')}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        source: htmlContent,
+        landscape: false,
+        use_print: true,
+      })
     });
 
-    const page = await browser.newPage();
-    
-    // Set content
-    await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+    if (!pdfResponse.ok) {
+      // API limit reached or error - trigger HTML fallback
+      return res.status(503).json({ error: 'PDF service limit reached' });
+    }
 
-    // Generate PDF
-    const pdf = await page.pdf({
-      format: 'A4',
-      margin: { top: '5mm', right: '5mm', bottom: '5mm', left: '5mm' },
-      printBackground: true,
-    });
-
-    await browser.close();
+    const pdfBuffer = await pdfResponse.arrayBuffer();
+    const buffer = Buffer.from(pdfBuffer);
 
     // Send PDF
     res.setHeader('Content-Type', 'application/pdf');
     res.setHeader('Content-Disposition', `attachment; filename="${data.name.toLowerCase().replace(/\s+/g, '-')}-cv.pdf"`);
-    res.send(pdf);
+    res.send(buffer);
 
   } catch (error) {
     console.error('PDF generation error:', error);
-    res.status(500).json({ error: 'Failed to generate PDF' });
+    // Return 503 to trigger HTML fallback
+    res.status(503).json({ error: 'PDF generation failed' });
   }
 }
 
