@@ -27,6 +27,12 @@
   gap: 16px;
 }
 
+.control-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .app-title {
   font-size: 18px;
   font-weight: 600;
@@ -49,6 +55,26 @@
 .mode-btn.active {
   background: #e0e0e0;
   color: #000;
+}
+
+.share-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 20px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  border: 1px solid #e0e0e0;
+  background: #fff;
+  color: #000;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.share-btn:hover {
+  background: #f5f5f5;
+  border-color: #ccc;
 }
 
 .download-btn {
@@ -569,4 +595,59 @@
 
 .tutorial-next:hover {
   opacity: 0.9;
+}
+
+/* Share Modal */
+.share-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: white;
+  border-radius: 12px;
+  padding: 32px;
+  max-width: 500px;
+  width: 90%;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.share-title {
+  font-size: 22px;
+  font-weight: 600;
+  color: #000;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.share-message {
+  font-size: 14px;
+  color: #666;
+  margin-bottom: 24px;
+  text-align: center;
+}
+
+.share-link-container {
+  margin-bottom: 24px;
+}
+
+.share-link-input {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  font-size: 14px;
+  font-family: monospace;
+  color: #666;
+  background: #f5f5f5;
+}
+
+.share-link-input:focus {
+  outline: none;
+  border-color: #999;
+}
+
+.share-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
 }

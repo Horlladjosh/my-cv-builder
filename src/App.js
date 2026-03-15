@@ -124,6 +124,24 @@ export default function CVBuilder() {
     return !tutorialSeen; // Show if NOT seen
   });
   const [tutorialStep, setTutorialStep] = useState(0);
+  const [shareUrl, setShareUrl] = useState('');
+  const [showShareModal, setShowShareModal] = useState(false);
+
+  // Check if URL has shared CV data on mount
+  React.useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const sharedData = urlParams.get('cv');
+    
+    if (sharedData) {
+      try {
+        const decodedData = JSON.parse(atob(sharedData));
+        setData(decodedData);
+        setIsEditing(false); // Shared CVs open in preview mode
+      } catch (e) {
+        console.error('Invalid shared CV data');
+      }
+    }
+  }, []);
 
   const tutorialSteps = [
     {
@@ -170,6 +188,18 @@ export default function CVBuilder() {
   const skipTutorial = () => {
     setShowTutorial(false);
     localStorage.setItem('cvBuilderTutorialSeen', 'true');
+  };
+
+  const generateShareLink = () => {
+    const encodedData = btoa(JSON.stringify(data));
+    const url = `${window.location.origin}${window.location.pathname}?cv=${encodedData}`;
+    setShareUrl(url);
+    setShowShareModal(true);
+  };
+
+  const copyShareLink = () => {
+    navigator.clipboard.writeText(shareUrl);
+    alert('Link copied to clipboard!');
   };
 
   // Helper functions
@@ -298,7 +328,32 @@ export default function CVBuilder() {
     }));
   };
 
-  const exportPDF = () => {
+  const exportPDF = async () => {
+    try {
+      // Try server-side PDF generation first
+      const response = await fetch('/api/generate-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data })
+      });
+
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${data.name.toLowerCase().replace(/\s+/g, '-')}-cv.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        return;
+      }
+    } catch (error) {
+      console.log('Server PDF generation failed, using fallback method');
+    }
+
+    // Fallback: HTML download method
     const htmlContent = `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -431,6 +486,35 @@ export default function CVBuilder() {
         </div>
       )}
 
+      {/* Share Modal */}
+      {showShareModal && (
+        <div className="tutorial-overlay" onClick={() => setShowShareModal(false)}>
+          <div className="share-modal" onClick={(e) => e.stopPropagation()}>
+            <h3 className="share-title">Share Your CV</h3>
+            <p className="share-message">Anyone with this link can view your CV</p>
+            
+            <div className="share-link-container">
+              <input 
+                type="text" 
+                value={shareUrl} 
+                readOnly 
+                className="share-link-input"
+                onClick={(e) => e.target.select()}
+              />
+            </div>
+
+            <div className="share-buttons">
+              <button className="tutorial-btn tutorial-back" onClick={() => setShowShareModal(false)}>
+                Close
+              </button>
+              <button className="tutorial-btn tutorial-next" onClick={copyShareLink}>
+                Copy Link
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="control-bar">
         <div className="control-content">
           <div className="control-left">
@@ -439,10 +523,15 @@ export default function CVBuilder() {
               {isEditing ? 'Save Changes' : 'Start Editing'}
             </button>
           </div>
-          <button onClick={exportPDF} className="download-btn">
-            <Download size={16} />
-            Download PDF
-          </button>
+          <div className="control-right">
+            <button onClick={generateShareLink} className="share-btn">
+              Share
+            </button>
+            <button onClick={exportPDF} className="download-btn">
+              <Download size={16} />
+              Download PDF
+            </button>
+          </div>
         </div>
       </div>
 
