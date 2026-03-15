@@ -328,32 +328,7 @@ export default function CVBuilder() {
     }));
   };
 
-  const exportPDF = async () => {
-    try {
-      // Try PDF API service first (free tier: 250/month)
-      const response = await fetch('/api/generate-pdf', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data })
-      });
-
-      if (response.ok) {
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `${data.name.toLowerCase().replace(/\s+/g, '-')}-cv.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
-        return; // Success! Exit here
-      }
-    } catch (error) {
-      console.log('PDF API limit reached or unavailable, using HTML fallback');
-    }
-
-    // Fallback: Download HTML method (always works!)
+  const exportPDF = () => {
     const htmlContent = generateHTMLContent(data);
     const blob = new Blob([htmlContent], { type: 'text/html' });
     const url = URL.createObjectURL(blob);
