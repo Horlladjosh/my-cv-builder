@@ -18,10 +18,10 @@ module.exports = async function handler(req, res) {
 
     // Launch Puppeteer with Chromium
     const browser = await puppeteer.launch({
-      args: chrome.args,
+      args: [...chrome.args, '--disable-dev-shm-usage'],
       defaultViewport: chrome.defaultViewport,
       executablePath: await chrome.executablePath(),
-      headless: chrome.headless,
+      headless: 'new',
     });
 
     const page = await browser.newPage();
