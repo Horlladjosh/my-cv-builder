@@ -330,7 +330,7 @@ export default function CVBuilder() {
 
   const exportPDF = async () => {
     try {
-      // Try server-side PDF generation first
+      // Try PDF API service first (free tier: 250/month)
       const response = await fetch('/api/generate-pdf', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -347,14 +347,29 @@ export default function CVBuilder() {
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(url);
-        return;
+        return; // Success! Exit here
       }
     } catch (error) {
-      console.log('Server PDF generation failed, using fallback method');
+      console.log('PDF API limit reached or unavailable, using HTML fallback');
     }
 
-    // Fallback: HTML download method
-    const htmlContent = `<!DOCTYPE html>
+    // Fallback: Download HTML method (always works!)
+    const htmlContent = generateHTMLContent(data);
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${data.name.toLowerCase().replace(/\s+/g, '-')}-cv.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    alert('HTML downloaded! Open it, then use Cmd+P (Mac) or Ctrl+P (Windows) to save as PDF.');
+  };
+
+  const generateHTMLContent = (data) => {
+    return `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -434,18 +449,6 @@ export default function CVBuilder() {
     </div>
 </body>
 </html>`;
-
-    const blob = new Blob([htmlContent], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${data.name.toLowerCase().replace(/\s+/g, '-')}-cv.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    
-    alert('HTML downloaded! Open it, then use Cmd+P → "Save as PDF".');
   };
 
   return (
