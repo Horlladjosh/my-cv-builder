@@ -495,27 +495,33 @@ export default function CVBuilder() {
 
       <div className="control-bar">
         <div className="control-content">
-          <div className="control-left">
-            <h2 className="app-title">CV Builder</h2>
-            <button onClick={() => setIsEditing(!isEditing)} className={`mode-btn ${isEditing ? 'active' : ''}`}>
-              {isEditing ? 'Save Changes' : 'Start Editing'}
-            </button>
-          </div>
-          <div className="control-right">
-            <button onClick={generateShareLink} className="share-btn">
-              Share
-            </button>
-            <button onClick={exportPDF} className="download-btn">
-              <Download size={16} />
-              Download PDF
-            </button>
-          </div>
+          <h2 className="app-title">CV Builder</h2>
+          <button onClick={() => setIsEditing(!isEditing)} className={`mode-btn ${isEditing ? 'active' : ''}`}>
+            {isEditing ? 'Save Changes' : 'Start Editing'}
+          </button>
         </div>
+      </div>
+
+      {/* Floating Action Buttons - Bottom Right */}
+      <div className="floating-actions">
+        <button onClick={generateShareLink} className="fab fab-share" title="Share">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="18" cy="5" r="3"></circle>
+            <circle cx="6" cy="12" r="3"></circle>
+            <circle cx="18" cy="19" r="3"></circle>
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+          </svg>
+        </button>
+        <button onClick={exportPDF} className="fab fab-download" title="Download PDF">
+          <Download size={20} />
+        </button>
       </div>
 
       <div className="cv-content">
         <div className="cv-grid">
-          <div className="main-col">
+          {/* Work & Projects Column */}
+          <div className="work-col">
             <div className="label">SELECTED WORK</div>
             <h2 className="heading">Work</h2>
 
@@ -580,7 +586,8 @@ export default function CVBuilder() {
             </div>
           </div>
 
-          <div className="sidebar">
+          {/* CV Info Sidebar */}
+          <div className="cv-sidebar">
             <div className="label">CURRICULUM VITAE</div>
             <div className="name"><EditableText isEditing={isEditing} value={data.name} onChange={(v) => setData(p => ({...p, name: v}))} placeholder="Name" /></div>
             <div className="bio"><EditableText isEditing={isEditing} value={data.bio} onChange={(v) => setData(p => ({...p, bio: v}))} multiline placeholder="Bio" /></div>

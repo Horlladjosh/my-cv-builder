@@ -21,18 +21,6 @@
   justify-content: space-between;
 }
 
-.control-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.control-right {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
 .app-title {
   font-size: 18px;
   font-weight: 600;
@@ -57,43 +45,56 @@
   color: #000;
 }
 
-.share-btn {
+/* Floating Action Buttons */
+.floating-actions {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 100;
+}
+
+.fab {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: none;
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 20px;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
-  border: 1px solid #e0e0e0;
-  background: #fff;
-  color: #000;
+  justify-content: center;
   cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   transition: all 0.2s;
 }
 
-.share-btn:hover {
-  background: #f5f5f5;
-  border-color: #ccc;
+.fab:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
 }
 
-.download-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 20px;
-  border-radius: 4px;
-  font-size: 14px;
-  font-weight: 500;
-  border: none;
+.fab-share {
+  background: #fff;
+  color: #000;
+  border: 1px solid #e0e0e0;
+}
+
+.fab-download {
   background: #000;
   color: #fff;
-  cursor: pointer;
-  transition: opacity 0.2s;
 }
 
-.download-btn:hover {
-  opacity: 0.9;
+@media (max-width: 768px) {
+  .floating-actions {
+    bottom: 16px;
+    right: 16px;
+  }
+  
+  .fab {
+    width: 48px;
+    height: 48px;
+  }
 }
 
 /* CV Content */
@@ -114,10 +115,54 @@
     grid-template-columns: 1fr;
     gap: 48px;
   }
+  
+  /* Swap order on mobile - CV info first */
+  .work-col {
+    order: 2;
+  }
+  
+  .cv-sidebar {
+    order: 1;
+  }
+  
+  /* Reduce font sizes on mobile */
+  .name {
+    font-size: 32px !important;
+  }
+  
+  .heading {
+    font-size: 24px !important;
+  }
+  
+  .company {
+    font-size: 15px !important;
+  }
+  
+  .cv-content {
+    padding: 40px 24px !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .cv-content {
+    padding: 32px 16px !important;
+  }
+  
+  .cv-grid {
+    gap: 32px;
+  }
+  
+  .name {
+    font-size: 28px !important;
+  }
+  
+  .heading {
+    font-size: 20px !important;
+  }
 }
 
 /* Main Column */
-.main-col {
+.work-col {
   min-width: 0;
 }
 
@@ -150,7 +195,7 @@
   transition: opacity 0.2s;
 }
 
-.main-col:hover .add-btn,
+.work-col:hover .add-btn,
 .projects:hover .add-btn {
   opacity: 1;
 }
@@ -306,7 +351,7 @@
 }
 
 /* Sidebar */
-.sidebar {
+.cv-sidebar {
   position: sticky;
   top: 96px;
   height: fit-content;
@@ -342,7 +387,7 @@
   color: #000;
 }
 
-.sidebar-label {
+.cv-sidebar-label {
   margin-top: 40px;
 }
 
