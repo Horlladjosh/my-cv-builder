@@ -127,6 +127,14 @@ export default function CVBuilder() {
   const [shareUrl, setShareUrl] = useState('');
   const [showShareModal, setShowShareModal] = useState(false);
   const [isEmbedMode, setIsEmbedMode] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
+  const showToast = (message, type = 'success') => {
+    setToast({ show: true, message, type });
+    setTimeout(() => {
+      setToast({ show: false, message: '', type: 'success' });
+    }, 3000);
+  };
 
   // Check if URL has shared CV data on mount
   React.useEffect(() => {
@@ -204,13 +212,13 @@ export default function CVBuilder() {
 
   const copyShareLink = () => {
     navigator.clipboard.writeText(shareUrl);
-    alert('Link copied to clipboard!');
+    showToast('Link copied to clipboard!');
   };
 
   const copyEmbedCode = () => {
     const embedCode = `<iframe src="${shareUrl.replace('?cv=', '/embed?cv=')}" width="100%" height="800px" style="border: 1px solid #e0e0e0; border-radius: 8px;" frameborder="0"></iframe>`;
     navigator.clipboard.writeText(embedCode);
-    alert('Embed code copied to clipboard!');
+    showToast('Embed code copied to clipboard!');
   };
 
   const shareViaEmail = () => {
@@ -357,7 +365,7 @@ export default function CVBuilder() {
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
     
-    alert('HTML downloaded! Open it, then use Cmd+P (Mac) or Ctrl+P (Windows) to save as PDF.');
+    showToast('HTML file downloaded! Open it and press Cmd+P to save as PDF', 'info');
   };
 
   const generateHTMLContent = (data) => {
@@ -518,6 +526,18 @@ export default function CVBuilder() {
               Close
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Toast Notification */}
+      {toast.show && (
+        <div className={`toast toast-${toast.type}`}>
+          <div className="toast-icon">
+            {toast.type === 'success' && '✓'}
+            {toast.type === 'info' && 'ℹ'}
+            {toast.type === 'error' && '✕'}
+          </div>
+          <div className="toast-message">{toast.message}</div>
         </div>
       )}
 
