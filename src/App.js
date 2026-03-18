@@ -126,9 +126,14 @@ export default function CVBuilder() {
   const [tutorialStep, setTutorialStep] = useState(0);
   const [shareUrl, setShareUrl] = useState('');
   const [showShareModal, setShowShareModal] = useState(false);
+  const [isEmbedMode, setIsEmbedMode] = useState(false);
 
   // Check if URL has shared CV data on mount
   React.useEffect(() => {
+    // Check if in embed mode
+    const isEmbed = window.location.pathname.includes('/embed');
+    setIsEmbedMode(isEmbed);
+    
     const urlParams = new URLSearchParams(window.location.search);
     const sharedData = urlParams.get('cv');
     
@@ -200,6 +205,18 @@ export default function CVBuilder() {
   const copyShareLink = () => {
     navigator.clipboard.writeText(shareUrl);
     alert('Link copied to clipboard!');
+  };
+
+  const copyEmbedCode = () => {
+    const embedCode = `<iframe src="${shareUrl.replace('?cv=', '/embed?cv=')}" width="100%" height="800px" style="border: 1px solid #e0e0e0; border-radius: 8px;" frameborder="0"></iframe>`;
+    navigator.clipboard.writeText(embedCode);
+    alert('Embed code copied to clipboard!');
+  };
+
+  const shareViaEmail = () => {
+    const subject = encodeURIComponent(`${data.name}'s CV`);
+    const body = encodeURIComponent(`View my CV here: ${shareUrl}`);
+    window.location.href = `mailto:?subject=${subject}&body=${body}`;
   };
 
   // Helper functions
@@ -427,9 +444,9 @@ export default function CVBuilder() {
   };
 
   return (
-    <div className="app">
+    <div className="app" data-embed={isEmbedMode}>
       {/* Tutorial Modal */}
-      {showTutorial && (
+      {!isEmbedMode && showTutorial && (
         <div className="tutorial-overlay">
           <div className={`tutorial-modal tutorial-${tutorialSteps[tutorialStep].position}`}>
             <button className="tutorial-skip" onClick={skipTutorial}>Skip</button>
@@ -469,41 +486,55 @@ export default function CVBuilder() {
         <div className="tutorial-overlay" onClick={() => setShowShareModal(false)}>
           <div className="share-modal" onClick={(e) => e.stopPropagation()}>
             <h3 className="share-title">Share Your CV</h3>
-            <p className="share-message">Anyone with this link can view your CV</p>
+            <p className="share-message">Choose how you want to share</p>
             
-            <div className="share-link-container">
-              <input 
-                type="text" 
-                value={shareUrl} 
-                readOnly 
-                className="share-link-input"
-                onClick={(e) => e.target.select()}
-              />
+            <div className="share-options">
+              <button className="share-option" onClick={copyShareLink}>
+                <div className="share-option-icon">🔗</div>
+                <div className="share-option-content">
+                  <div className="share-option-title">Copy Link</div>
+                  <div className="share-option-desc">Share via URL</div>
+                </div>
+              </button>
+
+              <button className="share-option" onClick={copyEmbedCode}>
+                <div className="share-option-icon">&lt;/&gt;</div>
+                <div className="share-option-content">
+                  <div className="share-option-title">Get Embed Code</div>
+                  <div className="share-option-desc">Add to your website</div>
+                </div>
+              </button>
+
+              <button className="share-option" onClick={shareViaEmail}>
+                <div className="share-option-icon">✉️</div>
+                <div className="share-option-content">
+                  <div className="share-option-title">Email Link</div>
+                  <div className="share-option-desc">Share via email</div>
+                </div>
+              </button>
             </div>
 
-            <div className="share-buttons">
-              <button className="tutorial-btn tutorial-back" onClick={() => setShowShareModal(false)}>
-                Close
-              </button>
-              <button className="tutorial-btn tutorial-next" onClick={copyShareLink}>
-                Copy Link
-              </button>
-            </div>
+            <button className="share-close" onClick={() => setShowShareModal(false)}>
+              Close
+            </button>
           </div>
         </div>
       )}
 
-      <div className="control-bar">
+      {/* Control Bar - Hidden in embed mode */}
+      {!isEmbedMode && (
+        <div className="control-bar">
         <div className="control-content">
           <h2 className="app-title">CV Builder</h2>
           <button onClick={() => setIsEditing(!isEditing)} className={`mode-btn ${isEditing ? 'active' : ''}`}>
             {isEditing ? 'Save Changes' : 'Start Editing'}
           </button>
         </div>
-      </div>
+      )}
 
-      {/* Floating Action Buttons - Bottom Right */}
-      <div className="floating-actions">
+      {/* Floating Action Buttons - Bottom Right - Hidden in embed mode */}
+      {!isEmbedMode && (
+        <div className="floating-actions">
         <button onClick={generateShareLink} className="fab fab-share" title="Share">
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <circle cx="18" cy="5" r="3"></circle>
@@ -517,6 +548,7 @@ export default function CVBuilder() {
           <Download size={20} />
         </button>
       </div>
+      )}
 
       <div className="cv-content">
         <div className="cv-grid">
