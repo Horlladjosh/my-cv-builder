@@ -357,6 +357,13 @@
   height: fit-content;
 }
 
+@media (max-width: 1024px) {
+  .cv-sidebar {
+    position: static; /* Remove sticky on mobile */
+    height: auto;
+  }
+}
+
 .name {
   font-size: 40px;
   font-weight: 400;
