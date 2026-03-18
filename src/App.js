@@ -524,11 +524,12 @@ export default function CVBuilder() {
       {/* Control Bar - Hidden in embed mode */}
       {!isEmbedMode && (
         <div className="control-bar">
-        <div className="control-content">
-          <h2 className="app-title">CV Builder</h2>
-          <button onClick={() => setIsEditing(!isEditing)} className={`mode-btn ${isEditing ? 'active' : ''}`}>
-            {isEditing ? 'Save Changes' : 'Start Editing'}
-          </button>
+          <div className="control-content">
+            <h2 className="app-title">CV Builder</h2>
+            <button onClick={() => setIsEditing(!isEditing)} className={`mode-btn ${isEditing ? 'active' : ''}`}>
+              {isEditing ? 'Save Changes' : 'Start Editing'}
+            </button>
+          </div>
         </div>
       )}
 
