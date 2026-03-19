@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { Download, Trash2 } from 'lucide-react';
+import { Analytics } from '@vercel/analytics/react';
+import { track } from '@vercel/analytics';
 import './App.css';
 
 // EditableText component - defined outside to prevent recreation on every render
@@ -213,18 +215,21 @@ export default function CVBuilder() {
   const copyShareLink = () => {
     navigator.clipboard.writeText(shareUrl);
     showToast('Link copied to clipboard!');
+    track('Share Link Copied');
   };
 
   const copyEmbedCode = () => {
     const embedCode = `<iframe src="${shareUrl.replace('?cv=', '/embed?cv=')}" width="100%" height="800px" style="border: 1px solid #e0e0e0; border-radius: 8px;" frameborder="0"></iframe>`;
     navigator.clipboard.writeText(embedCode);
     showToast('Embed code copied to clipboard!');
+    track('Embed Code Copied');
   };
 
   const shareViaEmail = () => {
     const subject = encodeURIComponent(`${data.name}'s CV`);
     const body = encodeURIComponent(`View my CV here: ${shareUrl}`);
     window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    track('Share Via Email');
   };
 
   // Helper functions
@@ -366,6 +371,7 @@ export default function CVBuilder() {
     URL.revokeObjectURL(url);
     
     showToast('HTML file downloaded! Open it and press Cmd+P to save as PDF', 'info');
+    track('PDF Downloaded');
   };
 
   const generateHTMLContent = (data) => {
@@ -686,6 +692,7 @@ export default function CVBuilder() {
           </div>
         </div>
       </div>
+      <Analytics />
     </div>
   );
 }
