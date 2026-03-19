@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
 import { Download, Trash2 } from 'lucide-react';
-import { Analytics } from '@vercel/analytics/react';
 import './App.css';
 
 // EditableText component - defined outside to prevent recreation on every render
@@ -26,12 +25,23 @@ const EditableText = ({ value, onChange, multiline = false, placeholder = "", is
 };
 
 export default function CVBuilder() {
-  const [data, setData] = useState({
-    name: "Sarah Martinez",
-    bio: "Product Manager specializing in B2B SaaS platforms, driving user-centric solutions from discovery to launch.",
-    email: "sarah.martinez@email.com",
-    twitter: "@sarahmartinez",
-    linkedin: "linkedin.com/in/sarahmartinez",
+  const [data, setData] = useState(() => {
+    // Try to load saved data from localStorage
+    const saved = localStorage.getItem('cvBuilderData');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch (e) {
+        console.error('Failed to parse saved data');
+      }
+    }
+    // Default data if nothing saved
+    return {
+      name: "Sarah Martinez",
+      bio: "Product Manager specializing in B2B SaaS platforms, driving user-centric solutions from discovery to launch.",
+      email: "sarah.martinez@email.com",
+      twitter: "@sarahmartinez",
+      linkedin: "linkedin.com/in/sarahmartinez",
     experience: [
       {
         id: 1,
@@ -116,6 +126,7 @@ export default function CVBuilder() {
       "Featured in 'Top 50 PMs to Follow' by Product School",
       "Speaker at ProductCon and Mind the Product conferences"
     ]
+    };
   });
 
   const [isEditing, setIsEditing] = useState(false);
@@ -130,11 +141,115 @@ export default function CVBuilder() {
   const [isEmbedMode, setIsEmbedMode] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
+  // Auto-save to localStorage whenever data changes
+  React.useEffect(() => {
+    localStorage.setItem('cvBuilderData', JSON.stringify(data));
+  }, [data]);
+
   const showToast = (message, type = 'success') => {
     setToast({ show: true, message, type });
     setTimeout(() => {
       setToast({ show: false, message: '', type: 'success' });
     }, 3000);
+  };
+
+  const resetToDefault = () => {
+    if (window.confirm('Are you sure you want to reset to default CV? This will clear all your changes.')) {
+      const defaultData = {
+        name: "Sarah Martinez",
+        bio: "Product Manager specializing in B2B SaaS platforms, driving user-centric solutions from discovery to launch.",
+        email: "sarah.martinez@email.com",
+        twitter: "@sarahmartinez",
+        linkedin: "linkedin.com/in/sarahmartinez",
+        experience: [
+          {
+            id: 1,
+            company: "CloudSync Technologies",
+            role: "Senior Product Manager",
+            year: "2022 - PRESENT",
+            points: [
+              "Launched real-time document collaboration feature adopted by 200K+ users within first quarter",
+              "Increased user retention by 35% through data-driven feature prioritization and UX improvements",
+              "Managed cross-functional team of 12 including engineers, designers, and data analysts"
+            ]
+          },
+          {
+            id: 2,
+            company: "PaymentHub Inc",
+            role: "Product Manager",
+            year: "2019 - 2022",
+            points: [
+              "Reduced customer support tickets by 45% through improved onboarding flow and in-app guidance",
+              "Delivered API integration toolkit that enabled 80+ third-party integrations",
+              "Conducted 150+ user interviews to validate product roadmap and feature hypotheses"
+            ]
+          },
+          {
+            id: 3,
+            company: "FitMetrics",
+            role: "Associate Product Manager",
+            year: "2017 - 2019",
+            points: [
+              "Coordinated launch of premium subscription tier generating $2M in first year revenue",
+              "Implemented A/B testing framework that improved conversion rates by 28%",
+              "Built product analytics dashboard tracking 50+ KPIs across user journey"
+            ]
+          }
+        ],
+        products: [
+          {
+            id: 1,
+            title: "InsightBoard",
+            role: "Product Lead",
+            points: [
+              "Built customer feedback aggregation tool that centralizes reviews, surveys, and support tickets",
+              "Used by 30+ product teams to prioritize features based on user sentiment analysis"
+            ]
+          },
+          {
+            id: 2,
+            title: "LaunchKit",
+            role: "Founder",
+            points: [
+              "Created product launch checklist and template library for PM teams",
+              "Distributed to 5,000+ product managers through ProductHunt and community forums"
+            ]
+          },
+          {
+            id: 3,
+            title: "MetricsFlow",
+            role: "Co-creator",
+            points: [
+              "Developed lightweight product analytics tool for early-stage startups",
+              "Helped 50+ teams track north star metrics and run growth experiments"
+            ]
+          }
+        ],
+        skills: [
+          "Product Strategy",
+          "User Research", 
+          "Data Analysis",
+          "Roadmap Planning",
+          "Stakeholder Management",
+          "A/B Testing",
+          "SQL & Analytics",
+          "Agile/Scrum"
+        ],
+        certifications: [
+          "Certified Scrum Product Owner (CSPO)",
+          "Google Analytics Certification",
+          "Product Management Certificate - General Assembly"
+        ],
+        recognition: [
+          "Product Leader of the Year - TechCon 2023",
+          "Featured in 'Top 50 PMs to Follow' by Product School",
+          "Speaker at ProductCon and Mind the Product conferences"
+        ]
+      };
+      setData(defaultData);
+      localStorage.setItem('cvBuilderData', JSON.stringify(defaultData));
+      showToast('Reset to default CV', 'info');
+    }
   };
 
   // Check if URL has shared CV data on mount
@@ -547,9 +662,16 @@ export default function CVBuilder() {
         <div className="control-bar">
           <div className="control-content">
             <h2 className="app-title">CV Builder</h2>
-            <button onClick={() => setIsEditing(!isEditing)} className={`mode-btn ${isEditing ? 'active' : ''}`}>
-              {isEditing ? 'Save Changes' : 'Start Editing'}
-            </button>
+            <div className="control-actions">
+              <button onClick={() => setIsEditing(!isEditing)} className={`mode-btn ${isEditing ? 'active' : ''}`}>
+                {isEditing ? 'Save Changes' : 'Start Editing'}
+              </button>
+              {isEditing && (
+                <button onClick={resetToDefault} className="reset-btn" title="Reset to default CV">
+                  Reset
+                </button>
+              )}
+            </div>
           </div>
         </div>
       )}
@@ -687,7 +809,6 @@ export default function CVBuilder() {
           </div>
         </div>
       </div>
-      <Analytics />
     </div>
   );
 }
